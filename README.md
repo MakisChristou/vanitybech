@@ -1,2 +1,18 @@
-# vanitygen-bench32
-Simple vanitygen using the libsecp256k1 used in Bitcoin Core
+## Compilation
+
+### Compile secp256k1
+```
+cd secp256k1
+./autogen.sh
+./configure
+make
+```
+
+### Compile Vanitygen
+
+```
+cd ..
+make clean
+make
+./vanitygen
+```
