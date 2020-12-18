@@ -213,53 +213,53 @@ int main(int argc, char** argv)
 
 	//
 	// Example from https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses
-	compressed_pubkey[32] = 0x02;
-	compressed_pubkey[31] = 0x50;
-	compressed_pubkey[30] = 0x86;
-	compressed_pubkey[29] = 0x3a;
-	compressed_pubkey[28] = 0xd6;
-	compressed_pubkey[27] = 0x4a;
-	compressed_pubkey[26] = 0x87;
-	compressed_pubkey[25] = 0xae;
-	compressed_pubkey[24] = 0x8a;
-	compressed_pubkey[23] = 0x2f;
-	compressed_pubkey[22] = 0xe8;
-	compressed_pubkey[21] = 0x3c;
-	compressed_pubkey[20] = 0x1a;
-	compressed_pubkey[19] = 0xf1;
-	compressed_pubkey[18] = 0xa8;
-	compressed_pubkey[17] = 0x40;
-	compressed_pubkey[16] = 0x3c;
-	compressed_pubkey[15] = 0xb5;
-	compressed_pubkey[14] = 0x3f;
-	compressed_pubkey[13] = 0x53;
-	compressed_pubkey[12] = 0xe4;
-	compressed_pubkey[11] = 0x86;
-	compressed_pubkey[10] = 0xd8;
-	compressed_pubkey[9] =  0x51;
-	compressed_pubkey[8] =  0x1d;
-	compressed_pubkey[7] =  0xad;
-	compressed_pubkey[6] =  0x8a;
-	compressed_pubkey[5] =  0x04;
-	compressed_pubkey[4] =  0x88;
-	compressed_pubkey[3] =  0x7e;
-	compressed_pubkey[2] =  0x5b;
-	compressed_pubkey[1] =  0x23;
-	compressed_pubkey[0] =  0x52;
+	// compressed_pubkey[32] = 0x02;
+	// compressed_pubkey[31] = 0x50;
+	// compressed_pubkey[30] = 0x86;
+	// compressed_pubkey[29] = 0x3a;
+	// compressed_pubkey[28] = 0xd6;
+	// compressed_pubkey[27] = 0x4a;
+	// compressed_pubkey[26] = 0x87;
+	// compressed_pubkey[25] = 0xae;
+	// compressed_pubkey[24] = 0x8a;
+	// compressed_pubkey[23] = 0x2f;
+	// compressed_pubkey[22] = 0xe8;
+	// compressed_pubkey[21] = 0x3c;
+	// compressed_pubkey[20] = 0x1a;
+	// compressed_pubkey[19] = 0xf1;
+	// compressed_pubkey[18] = 0xa8;
+	// compressed_pubkey[17] = 0x40;
+	// compressed_pubkey[16] = 0x3c;
+	// compressed_pubkey[15] = 0xb5;
+	// compressed_pubkey[14] = 0x3f;
+	// compressed_pubkey[13] = 0x53;
+	// compressed_pubkey[12] = 0xe4;
+	// compressed_pubkey[11] = 0x86;
+	// compressed_pubkey[10] = 0xd8;
+	// compressed_pubkey[9] =  0x51;
+	// compressed_pubkey[8] =  0x1d;
+	// compressed_pubkey[7] =  0xad;
+	// compressed_pubkey[6] =  0x8a;
+	// compressed_pubkey[5] =  0x04;
+	// compressed_pubkey[4] =  0x88;
+	// compressed_pubkey[3] =  0x7e;
+	// compressed_pubkey[2] =  0x5b;
+	// compressed_pubkey[1] =  0x23;
+	// compressed_pubkey[0] =  0x52;
 
 	// Reverse Public Key (Useless)
-	int j = 32;
-	for(int i = 0; i < 17; i++)
-	{
-		// printf("%d vs %d\n",i,j);
-		// printf("%02X vs %02X\n",compressed_pubkey[i],compressed_pubkey[j]);
-		unsigned char temp;
-		temp = compressed_pubkey[j];
-		compressed_pubkey[j] = compressed_pubkey[i];
-		compressed_pubkey[i] = temp;
-		// printf("%02X vs %02X\n\n",compressed_pubkey[i],compressed_pubkey[j]);
-		j--;
-	}
+	// int j = 32;
+	// for(int i = 0; i < 17; i++)
+	// {
+	// 	// printf("%d vs %d\n",i,j);
+	// 	// printf("%02X vs %02X\n",compressed_pubkey[i],compressed_pubkey[j]);
+	// 	unsigned char temp;
+	// 	temp = compressed_pubkey[j];
+	// 	compressed_pubkey[j] = compressed_pubkey[i];
+	// 	compressed_pubkey[i] = temp;
+	// 	// printf("%02X vs %02X\n\n",compressed_pubkey[i],compressed_pubkey[j]);
+	// 	j--;
+	// }
 	
 	printf("\n\n");
 		for(int i = 0; i < 32; i++)
@@ -380,19 +380,8 @@ int main(int argc, char** argv)
 
 	printf("\n");
 
-	printf("ScriptPubKey_Append = ");
-	ScriptPubKey_Append[20] = ScriptPubKey_Append[20] & 0x0;
-	ScriptPubKey_Append[21] = ScriptPubKey_Append[21] & 0x0;
-
-	for(int i = 0; i < 22; i++)
-	{
-		printf("%02x",ScriptPubKey_Append[i]);
-	}
-
-	printf("\n");
 
 	printf("Address: %s\n",output);
-
 
 	printf("\n\n");
 	printf("               Private Key Size = %d bytes, %d bits \n",sizeof(privkey),sizeof(privkey)*8);
