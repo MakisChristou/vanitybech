@@ -1,10 +1,13 @@
 ## Compilation
 
 ```
-cd ..
-make clean
+sudo apt install build-essential libgmp-dev libssl-dev
 make
-./vanitygen bc1qmakls
-Private Key:   Kz5sXEYCRQ7uwwV2SxrBfG6CWgw2y48xT7XJa69QXijSDQYmLixo
-Address: bc1qmaklspv80y009dh87cx0klk48avcngwpu4z8f7
+time ./vanitygen
+Private Key:   L42DfXUbG4nkcaxt5qkGQxJ91MafNyEGisZfjkcKCQQQxGeG7twi
+Address: bc1qtestraqjhj47v89atlqc0xklaekee9h0ckl0wc
+
+real	0m53,957s
+user	0m49,186s
+sys	0m4,643s
 ```

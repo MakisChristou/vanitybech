@@ -102,7 +102,7 @@ int main(int argc, char** argv)
 
 
 	// Pattern Matching
-	char *pattern = "bc1qmakls";
+	char *pattern = "bc1qtest";
 
 	for(int i = 3; i < strlen(pattern); i++)
 	{
