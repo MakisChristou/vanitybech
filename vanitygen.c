@@ -74,25 +74,6 @@ void parse_arguments(int argc, char** argv)
 
 }
 
-// Useless function, don't know why I even wrote it
-unsigned char* reverse_pubkey(unsigned char* compressed_pubkey)
-{
-	// Reverse Public Key (Useless)
-	int j = 32;
-	for(int i = 0; i < 17; i++)
-	{
-		// printf("%d vs %d\n",i,j);
-		// printf("%02X vs %02X\n",compressed_pubkey[i],compressed_pubkey[j]);
-		unsigned char temp;
-		temp = compressed_pubkey[j];
-		compressed_pubkey[j] = compressed_pubkey[i];
-		compressed_pubkey[i] = temp;
-		// printf("%02X vs %02X\n\n",compressed_pubkey[i],compressed_pubkey[j]);
-		j--;
-	}
-
-	return compressed_pubkey;
-}
 
 
 // Here is where the magic happens
@@ -154,7 +135,7 @@ int main(int argc, char** argv)
 	int result = secp256k1_ec_pubkey_serialize(sec_ctx,compressed_pubkey,outputlen,&public_key,SECP256K1_EC_COMPRESSED);
 	
 
-	int valid_private_key = secp256k1_ec_seckey_verify(sec_ctx,&privkey);
+	//int valid_private_key = secp256k1_ec_seckey_verify(sec_ctx,&privkey);
 
 
 
@@ -232,97 +213,101 @@ int main(int argc, char** argv)
 
 	//
 	// Example from https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses
-	// compressed_pubkey[32] = 0x02;
-	// compressed_pubkey[31] = 0x50;
-	// compressed_pubkey[30] = 0x86;
-	// compressed_pubkey[29] = 0x3a;
-	// compressed_pubkey[28] = 0xd6;
-	// compressed_pubkey[27] = 0x4a;
-	// compressed_pubkey[26] = 0x87;
-	// compressed_pubkey[25] = 0xae;
-	// compressed_pubkey[24] = 0x8a;
-	// compressed_pubkey[23] = 0x2f;
-	// compressed_pubkey[22] = 0xe8;
-	// compressed_pubkey[21] = 0x3c;
-	// compressed_pubkey[20] = 0x1a;
-	// compressed_pubkey[19] = 0xf1;
-	// compressed_pubkey[18] = 0xa8;
-	// compressed_pubkey[17] = 0x40;
-	// compressed_pubkey[16] = 0x3c;
-	// compressed_pubkey[15] = 0xb5;
-	// compressed_pubkey[14] = 0x3f;
-	// compressed_pubkey[13] = 0x53;
-	// compressed_pubkey[12] = 0xe4;
-	// compressed_pubkey[11] = 0x86;
-	// compressed_pubkey[10] = 0xd8;
-	// compressed_pubkey[9] =  0x51;
-	// compressed_pubkey[8] =  0x1d;
-	// compressed_pubkey[7] =  0xad;
-	// compressed_pubkey[6] =  0x8a;
-	// compressed_pubkey[5] =  0x04;
-	// compressed_pubkey[4] =  0x88;
-	// compressed_pubkey[3] =  0x7e;
-	// compressed_pubkey[2] =  0x5b;
-	// compressed_pubkey[1] =  0x23;
-	// compressed_pubkey[0] =  0x52;
+	compressed_pubkey[32] = 0x02;
+	compressed_pubkey[31] = 0x50;
+	compressed_pubkey[30] = 0x86;
+	compressed_pubkey[29] = 0x3a;
+	compressed_pubkey[28] = 0xd6;
+	compressed_pubkey[27] = 0x4a;
+	compressed_pubkey[26] = 0x87;
+	compressed_pubkey[25] = 0xae;
+	compressed_pubkey[24] = 0x8a;
+	compressed_pubkey[23] = 0x2f;
+	compressed_pubkey[22] = 0xe8;
+	compressed_pubkey[21] = 0x3c;
+	compressed_pubkey[20] = 0x1a;
+	compressed_pubkey[19] = 0xf1;
+	compressed_pubkey[18] = 0xa8;
+	compressed_pubkey[17] = 0x40;
+	compressed_pubkey[16] = 0x3c;
+	compressed_pubkey[15] = 0xb5;
+	compressed_pubkey[14] = 0x3f;
+	compressed_pubkey[13] = 0x53;
+	compressed_pubkey[12] = 0xe4;
+	compressed_pubkey[11] = 0x86;
+	compressed_pubkey[10] = 0xd8;
+	compressed_pubkey[9] =  0x51;
+	compressed_pubkey[8] =  0x1d;
+	compressed_pubkey[7] =  0xad;
+	compressed_pubkey[6] =  0x8a;
+	compressed_pubkey[5] =  0x04;
+	compressed_pubkey[4] =  0x88;
+	compressed_pubkey[3] =  0x7e;
+	compressed_pubkey[2] =  0x5b;
+	compressed_pubkey[1] =  0x23;
+	compressed_pubkey[0] =  0x52;
 
-
-	printf("ScriptPubKey        =   ");
-	for(int i = 20-1; i >= 0; i--)
+	// Reverse Public Key (Useless)
+	int j = 32;
+	for(int i = 0; i < 17; i++)
 	{
-		printf("%02X",ScriptPubKey[i]);
-		ScriptPubKey_Append[i] = ScriptPubKey[i];
+		// printf("%d vs %d\n",i,j);
+		// printf("%02X vs %02X\n",compressed_pubkey[i],compressed_pubkey[j]);
+		unsigned char temp;
+		temp = compressed_pubkey[j];
+		compressed_pubkey[j] = compressed_pubkey[i];
+		compressed_pubkey[i] = temp;
+		// printf("%02X vs %02X\n\n",compressed_pubkey[i],compressed_pubkey[j]);
+		j--;
 	}
+	
+	printf("\n\n");
+		for(int i = 0; i < 32; i++)
+		printf("%02x",rmd_block[i]);
 
-	printf("\n");
-
-	printf("rmd_block: ");
-	for(int i = 32-1; i >= 0; i--)
-	{
-		printf("%02X",i,rmd_block[i]);
-	}
-	printf("\n");
-
-	printf("sha_block: ");
-	for(int i = 32-1; i >= 0; i--)
-	{
-		printf("%02X",i,sha_block[i]);
-	}
-	printf("\n");
-
-
-	// Using Openssl for double checking 
-	//SHA256(compressed_pubkey, 33, rmd_block);
-
-	printf("SHA256: ");
-	for(int i = 32-1; i >= 0; i--)
-	{
-		printf("%02X",i,rmd_block[i]);
-	}
 	printf("\n");
 
 	/* Double Hash Compressed public key */
-	// sha_block = compressed_pubkey;
-
-	for(int i = 0; i < 33; i++)
+	int openssl = 1;
+	if(openssl)
 	{
-		sha_block[i] = compressed_pubkey[i];
+		// Using Openssl for double checking 
+		SHA256(compressed_pubkey, 33, rmd_block);
+		RIPEMD160(rmd_block, 32, ScriptPubKey);
 	}
-
-	sha256_hash(rmd_block, sha_block);
-
-	printf("SHA256: ");
-	for(int i = 32-1; i >= 0; i--)
+	else
 	{
-		printf("%02X",i,rmd_block[i]);
+		/* Double Hash Compressed public key */
+		for(int i = 0; i < 33; i++)
+		{
+			sha_block[i] = compressed_pubkey[i];
+		}
+		sha256_hash(rmd_block, compressed_pubkey);
+		rmd160_hash(ScriptPubKey, rmd_block);
 	}
-	printf("\n");
-
-
-    rmd160_hash(ScriptPubKey, rmd_block);
-
 	
 
+	for(int i = 0; i < 32; i++)
+		printf("%02x",rmd_block[i]);
+
+	printf("\n");
+	// printf("rmd_block: ");
+	// for(int i = 32-1; i >= 0; i--)
+	// {
+	// 	printf("%02X",i,rmd_block[i]);
+	// }
+	// printf("\n");
+
+	// printf("sha_block: ");
+	// for(int i = 32-1; i >= 0; i--)
+	// {
+	// 	printf("%02X",i,sha_block[i]);
+	// }
+	// printf("\n");
+
+
+
+	
 
 
 	char output[93];
@@ -374,30 +359,22 @@ int main(int argc, char** argv)
 	//Print Binary Contents of public
 	for(int i = 33-1; i >= 0; i--)
 	{
-		printf("%02X",compressed_pubkey[i]);
+		printf("%02x",compressed_pubkey[i]);
 	}
 	printf("\n");
 
 
-	printf("SHA256: ");
-	for(int i = 32-1; i >= 0; i--)
+	printf("rmd_block: ");
+	for(int i = 0; i < 20; i++)
 	{
-		printf("%02X",i,rmd_block[i]);
+		printf("%02x",rmd_block[i]);
 	}
-	printf("\n");
-
-	printf("RIPEMD160: ");
-	for(int i = 20-1; i >= 0; i--)
-	{
-		printf("%02X",ScriptPubKey[i]);
-	}
-
 	printf("\n");
 
 	printf("ScriptPubKey        =   ");
-	for(int i = 20-1; i >= 0; i--)
+	for(int i = 0; i < 20; i++)
 	{
-		printf("%02X",ScriptPubKey[i]);
+		printf("%02x",ScriptPubKey[i]);
 		ScriptPubKey_Append[i] = ScriptPubKey[i];
 	}
 
@@ -407,10 +384,11 @@ int main(int argc, char** argv)
 	ScriptPubKey_Append[20] = ScriptPubKey_Append[20] & 0x0;
 	ScriptPubKey_Append[21] = ScriptPubKey_Append[21] & 0x0;
 
-	for(int i = 22-1; i >= 0; i--)
+	for(int i = 0; i < 22; i++)
 	{
-		printf("%02X",ScriptPubKey_Append[i]);
+		printf("%02x",ScriptPubKey_Append[i]);
 	}
+
 	printf("\n");
 
 	printf("Address: %s\n",output);
