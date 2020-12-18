@@ -302,7 +302,14 @@ int main(int argc, char** argv)
 	printf("\n");
 
 	/* Double Hash Compressed public key */
-	//sha256_hash(rmd_block, compressed_pubkey);
+	// sha_block = compressed_pubkey;
+
+	for(int i = 0; i < 33; i++)
+	{
+		sha_block[i] = compressed_pubkey[i];
+	}
+
+	sha256_hash(rmd_block, sha_block);
 
 	printf("SHA256: ");
 	for(int i = 32-1; i >= 0; i--)
