@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Ofast -Wall -Wno-unused-function -Wno-pointer-sign \
        -I. -Isecp256k1 -Isecp256k1/include -funsafe-loop-optimizations
 LDFLAGS=$(CFLAGS)
-LDLIBS=-lm -lgmp
+LDLIBS=-lm -lgmp -lssl -lcrypto
 
 SHA256=sha256/sha256.o sha256/sha256-avx-asm.o sha256/sha256-avx2-asm.o \
        sha256/sha256-ssse3-asm.o sha256/sha256-ni-asm.o
