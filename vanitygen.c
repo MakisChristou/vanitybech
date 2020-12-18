@@ -75,6 +75,7 @@ void parse_arguments(int argc, char** argv)
 }
 
 
+int debug = 0;
 
 // Here is where the magic happens
 int main(int argc, char** argv)
@@ -98,6 +99,20 @@ int main(int argc, char** argv)
 	// Generate a random private key. Specifically, any 256-bit number from 0x1
 	// to 0xFFFF FFFF FFFF FFFF FFFF FFFF FFFF FFFE BAAE DCE6 AF48 A03B BFD2 5E8C
 	// D036 4140 is a valid private key.
+
+
+	// Pattern Matching
+	char *pattern = "bc1qmakls";
+
+	for(int i = 3; i < strlen(pattern); i++)
+	{
+		if(pattern[i] == '1' || pattern[i] == 'b' || pattern[i] == 'i' || pattern[i] == 'o')
+		{
+			printf("Invalid Pattern!\n");
+			exit(1);
+		}
+	}
+
 
 	again:
 
@@ -247,7 +262,7 @@ int main(int argc, char** argv)
 	// compressed_pubkey[1] =  0x23;
 	// compressed_pubkey[0] =  0x52;
 
-	// Reverse Public Key (Useless)
+	// Reverse Public Key (Only for hardcoded public keys)
 	// int j = 32;
 	// for(int i = 0; i < 17; i++)
 	// {
@@ -260,12 +275,15 @@ int main(int argc, char** argv)
 	// 	// printf("%02X vs %02X\n\n",compressed_pubkey[i],compressed_pubkey[j]);
 	// 	j--;
 	// }
-	
-	printf("\n\n");
-		for(int i = 0; i < 32; i++)
-		printf("%02x",rmd_block[i]);
 
-	printf("\n");
+	if(debug)
+	{
+		printf("\n\n");
+		for(int i = 0; i < 32; i++)
+			printf("%02x",rmd_block[i]);
+		printf("\n");
+	}
+	
 
 	/* Double Hash Compressed public key */
 	int openssl = 1;
@@ -286,26 +304,12 @@ int main(int argc, char** argv)
 		rmd160_hash(ScriptPubKey, rmd_block);
 	}
 	
-
-	for(int i = 0; i < 32; i++)
-		printf("%02x",rmd_block[i]);
-
-	printf("\n");
-	// printf("rmd_block: ");
-	// for(int i = 32-1; i >= 0; i--)
-	// {
-	// 	printf("%02X",i,rmd_block[i]);
-	// }
-	// printf("\n");
-
-	// printf("sha_block: ");
-	// for(int i = 32-1; i >= 0; i--)
-	// {
-	// 	printf("%02X",i,sha_block[i]);
-	// }
-	// printf("\n");
-
-
+	if(debug)
+	{
+		for(int i = 0; i < 32; i++)
+			printf("%02x",rmd_block[i]);
+		printf("\n");
+	}
 
 	
 
@@ -328,34 +332,22 @@ int main(int argc, char** argv)
 	}
 
 
-	// Pattern Matching
-	char *pattern = "bc1qpt";
-
-	//printf("%s\n",pattern);
-	//printf("Sizeof(pattern) %d\n",sizeof(pattern));
 
 	// Check if pattern matches
-	// for(int i = 0; i < 6; i++)
-	// {
-	// 	if(!(pattern[i] == output[i]))
-	// 	{
-	// 		goto again;
-	// 	}
-	// }
+	for(int i = 0; i < strlen(pattern); i++)
+	{
+		if(!(pattern[i] == output[i]))
+		{
+			goto again;
+		}
+	}
 
-
-	// Don't know why this is printing like that
-	// printf("privKey : ");
-	// for(int i = 3; i >=0 ; i--)
-	// {
-	// 	printf("%02X",privkey[i]);
-	// }
-	// printf("\n");
-
-	// Result Printing
+	// Print WIF private key
 	announce_result(1,privkey);
 
-	printf("pubComp : ");
+	if(debug)
+	{
+		printf("pubComp : ");
 	//Print Binary Contents of public
 	for(int i = 33-1; i >= 0; i--)
 	{
@@ -379,17 +371,22 @@ int main(int argc, char** argv)
 	}
 
 	printf("\n");
+	}
 
 
 	printf("Address: %s\n",output);
 
-	printf("\n\n");
-	printf("               Private Key Size = %d bytes, %d bits \n",sizeof(privkey),sizeof(privkey)*8);
-	printf("(Uncompressed) Public  Key Size = %d bytes, %d bits \n",sizeof(public_key.data),sizeof(public_key.data)*8);
-	printf("(Compressed)   Public  Key Size = %d bytes, %d bits \n",sizeof(compressed_pubkey),sizeof(compressed_pubkey)*8);
-	printf("          ScriptPubKey Key Size = %d bytes, %d bits \n",sizeof(ScriptPubKey),sizeof(ScriptPubKey)*8);
-	printf("   ScriptPubKey Key Append Size = %d bytes, %d bits \n",sizeof(ScriptPubKey_Append),sizeof(ScriptPubKey_Append)*8);
-	printf("\n\n");
+	if(debug)
+	{
+		printf("\n\n");
+		printf("               Private Key Size = %d bytes, %d bits \n",sizeof(privkey),sizeof(privkey)*8);
+		printf("(Uncompressed) Public  Key Size = %d bytes, %d bits \n",sizeof(public_key.data),sizeof(public_key.data)*8);
+		printf("(Compressed)   Public  Key Size = %d bytes, %d bits \n",sizeof(compressed_pubkey),sizeof(compressed_pubkey)*8);
+		printf("          ScriptPubKey Key Size = %d bytes, %d bits \n",sizeof(ScriptPubKey),sizeof(ScriptPubKey)*8);
+		printf("   ScriptPubKey Key Append Size = %d bytes, %d bits \n",sizeof(ScriptPubKey_Append),sizeof(ScriptPubKey_Append)*8);
+		printf("\n\n");
+	}
+
 
 	return 0;
 }
