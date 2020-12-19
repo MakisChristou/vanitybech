@@ -402,19 +402,19 @@ void vanity_engine()
 		// Seconds
 		if(eta <= 180)
 		{
-			printf("[%d Kkey/s][Total %d][ETA %0.2lf sec]\r",(int)iteration_per_second/1000,iteration,eta);
+			printf("[%d Kkey/s][Total %d][ETA %0.2lf sec]               \r",(int)iteration_per_second/1000,iteration,eta);
 		}
-		else if(eta > 180)
+		else if(eta < 180)
 		{
-			printf("[%d Kkey/s][Total %d][ETA %0.2lf min]\r",(int)iteration_per_second/1000,iteration,eta/60);
+			printf("[%d Kkey/s][Total %d][ETA %0.2lf min]               \r",(int)iteration_per_second/1000,iteration,eta/60);
 		}
-		else if(eta > 7200)
+		else if(eta < 7200)
 		{
-			printf("[%d Kkey/s][Total %d][ETA %0.2lf hours]\r",(int)iteration_per_second/1000,iteration,eta/60/60);
+			printf("[%d Kkey/s][Total %d][ETA %0.2lf hours]             \r",(int)iteration_per_second/1000,iteration,eta/60/60);
 		}
 		else
 		{
-			printf("[%d Kkey/s][Total %d][ETA %0.2lf days]\r",(int)iteration_per_second/1000,iteration,eta/60/60/24);
+			printf("[%d Kkey/s][Total %d][ETA %0.2lf days]              \r",(int)iteration_per_second/1000,iteration,eta/60/60/24);
 		}
 	}
 
