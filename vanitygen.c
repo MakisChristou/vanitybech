@@ -392,10 +392,30 @@ void vanity_engine()
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 	iteration++;
 	iteration_per_second = 1.0/cpu_time_used;
+	int pattern_length = strlen(pattern)-4;
+	double num_of_patterns = pow(33,pattern_length);
+	double eta = cpu_time_used*num_of_patterns;
+	
 
 	if(iteration == 1 || ((iteration % 1000) == 0))
 	{
-		printf("[%d Kkey/s][Total %d]\r",(int)iteration_per_second/1000,iteration);
+		// Seconds
+		if(eta <= 180)
+		{
+			printf("[%d Kkey/s][Total %d][ETA %0.2lf sec]\r",(int)iteration_per_second/1000,iteration,eta);
+		}
+		else if(eta > 180)
+		{
+			printf("[%d Kkey/s][Total %d][ETA %0.2lf min]\r",(int)iteration_per_second/1000,iteration,eta/60);
+		}
+		else if(eta > 7200)
+		{
+			printf("[%d Kkey/s][Total %d][ETA %0.2lf hours]\r",(int)iteration_per_second/1000,iteration,eta/60/60);
+		}
+		else
+		{
+			printf("[%d Kkey/s][Total %d][ETA %0.2lf days]\r",(int)iteration_per_second/1000,iteration,eta/60/60/24);
+		}
 	}
 
 
@@ -409,8 +429,7 @@ void vanity_engine()
 	}
 
 	
-    
-     
+	
 	printf("\n");
 	
 

@@ -7,10 +7,11 @@ make
 
 ## Bicoin Address
 ```
-$ ./vanitygen -c BTC -p bcq1test
+$ ./vanitygen -p bc1qtest
 Pattern: bc1qtest
 Generating BTC Address
-Private Key:   L3G9Cxtfz5rJ9WK65JWxrqYChyADz6SeQaG3CHUUTfUot7drKQ81
-Address:       bc1qtestzl055kqr6nfrn8yxwf8ec83jzd0yqpfckf
+[19 Kkey/s][Total 442000][ETA 61.67 sec]
+Private Key:   KxzUS25zbnsZrE9bFKhoFSJwaqX8qiSvJXepKSsL3kat1nECzoTL
+Address:       bc1qtestxfcj2938qv266a3guv8dkav72z9rp65jq6
 ```
 
