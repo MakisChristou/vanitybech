@@ -13,6 +13,7 @@
 
 // Chad Thundercock
 #include <pthread.h>
+#include <time.h>
 #include <openssl/sha.h>
 #include <openssl/ripemd.h>
 
@@ -116,6 +117,11 @@ void parse_arguments(int argc, char** argv)
 			check_pattern(optarg);
 			pattern = optarg;
 		}
+		else
+		{
+			exit(1); // exit on wrong argument
+		}
+		
 	}
 }
 
@@ -123,8 +129,6 @@ void parse_arguments(int argc, char** argv)
 // Make sure user provided pattern is correct
 void check_pattern(char* pattern)
 {
-
-	
 	if(pattern[0] != 'b' || pattern[1] != 'c' ||pattern[2] != '1' ||pattern[3] != 'q')
 	{
 		printf("Bitcoin address starts with bc1q\n");
@@ -149,8 +153,9 @@ void check_pattern(char* pattern)
 	}
 }
 
-// Here is where the magic happens
-int main(int argc, char** argv)
+
+// Address generation code
+void vanity_engine()
 {
 
 	// Declare Secp256k1 Stuff
@@ -164,7 +169,10 @@ int main(int argc, char** argv)
 	const uint8_t *witprog;
 	witprog = ScriptPubKey;
 	size_t witprog_len = 20;
-
+	clock_t start, end;
+    double cpu_time_used;
+	unsigned long long int iteration = 0;
+	double iteration_per_second = 0;
 
 	/* Initialize the secp256k1 context */
 	sec_ctx=secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
@@ -179,16 +187,13 @@ int main(int argc, char** argv)
 	// to 0xFFFF FFFF FFFF FFFF FFFF FFFF FFFF FFFE BAAE DCE6 AF48 A03B BFD2 5E8C
 	// D036 4140 is a valid private key.
 
-	parse_arguments(argc,argv);
-	printf("Pattern: %s\n",pattern);
-	printf("Generating BTC Address\n");
-
-	
-	
-	//get_difficulty(pattern,hrp);
 
 
 	again:
+
+	
+    start = clock();
+	
 
 	// Generate private key
 	if((fd=open("/dev/urandom", O_RDONLY|O_NOCTTY)) == -1) {
@@ -373,10 +378,7 @@ int main(int argc, char** argv)
 
 	
 
-
-
 	int convert_bech32 = segwit_addr_encode(output,hrp,0,witprog, witprog_len);
-
 
 	if(convert_bech32 == 0)
 	{
@@ -384,6 +386,17 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
+
+	// Calculate
+	end = clock();
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+	iteration++;
+	iteration_per_second = 1.0/cpu_time_used;
+
+	if(iteration == 1 || ((iteration % 1000) == 0))
+	{
+		printf("[%d Kkey/s][Total %d]\r",(int)iteration_per_second/1000,iteration);
+	}
 
 
 	// Check if pattern matches
@@ -394,6 +407,12 @@ int main(int argc, char** argv)
 			goto again;
 		}
 	}
+
+	
+    
+     
+	printf("\n");
+	
 
 	// Print WIF private key
 	announce_result(1,privkey);
@@ -437,6 +456,23 @@ int main(int argc, char** argv)
 		printf("          ScriptPubKey Key Size = %d bytes, %d bits \n",sizeof(ScriptPubKey),sizeof(ScriptPubKey)*8);
 		printf("\n\n");
 	}
+
+}
+
+// Here is where the magic happens
+int main(int argc, char** argv)
+{
+
+
+	parse_arguments(argc,argv);
+
+
+	printf("Pattern: %s\n",pattern);
+	printf("Generating BTC Address\n");
+
+
+	// Address generation loop
+	vanity_engine();
 
 
 	return 0;
