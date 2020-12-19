@@ -17,6 +17,14 @@
 #include <openssl/ripemd.h>
 
 
+// Yes these are global variables!
+int debug = 0;
+int coin = 0;
+int threads = -1;
+int output = 0;
+char *pattern = "bc1qtest"; // Pattern to match 
+char *hrp = "bc"; // Different for each coin
+char *output_file;
 
 // Stolen from supervanitygen
 void announce_result(int found, const u8 result[52])
@@ -61,30 +69,140 @@ void announce_result(int found, const u8 result[52])
 //   printf("Address:       %s\n", wif);
 }
 
-
 // Run this on retarded user input
 void print_usage()
 {
 
 }
 
-
-void parse_arguments(int argc, char** argv)
+// Difficulty = 1/{valid pattern space}
+double get_difficulty(char* pattern, char* hrp)
 {
+	int start = strlen(hrp)+2;
+	int length = strlen(pattern);
+
+	//33^(length)
+	double pattern_space = pow(33,(length-start));
+
+	printf("Pattern Space = %lf\n",pattern_space);
 
 }
 
+// Help user out
+void print_help()
+{
+	printf("./vanitygen -c <COIN> -t <THREADS> -p <PATTERN> \n");
+	printf("Example Generating Bitcoin Address\n");
+	printf("./vanitygen -C BTC -p bc1qtest\n");
+}
 
-int debug = 0;
+// Use getopt to parse cli arguments
+void parse_arguments(int argc, char** argv)
+{
+	int opt;
+	while((opt = getopt(argc,argv, "c:p:t:")) != -1)
+	{
+		//Print Help Message
+		if(opt == 'h')
+		{
+			print_help();
+		}
+		// Select Coin
+		else if(opt == 'c')
+		{
+			if(!strcmp(optarg,"BTC"))
+			{
+				coin = 0;
+			}
+			else if(!strcmp(optarg,"RIC"))
+			{
+				coin = 1;
+			}
+			else
+			{
+				printf("Invalid coin selection\n");
+				exit(-1);
+			}
+		}
+		// Output results in a file
+		else if(opt == 'o')
+		{
+			output_file = optarg;
+		}
+		// Choose number of threads
+		else if(opt == 't')
+		{
+			threads = optarg;
+		}
+		// Choose pattern
+		else if(opt == 'p')
+		{
+			check_pattern(optarg);
+			pattern = optarg;
+		}
+	}
+}
+
+// Run this on retarted user pattern
+void print_patterns()
+{
+	printf("Invalid Pattern!\n");
+	printf("Valid characters are: acdefghjklmlnpqrstuvwsyz023456789\n");
+}
+
+// Make sure user provided pattern is correct
+void check_pattern(char* pattern)
+{
+
+	if(coin == 0)
+	{
+		if(pattern[0] != 'b' || pattern[1] != 'c' ||pattern[2] != '1' ||pattern[3] != 'q')
+		{
+			printf("Bitcoin address starts with bc1q\n");
+			exit(1);
+		}
+	}
+	else if(coin == 1)
+	{
+		if(pattern[0] != 'r' || pattern[1] != 'i' || pattern[2] != 'c' || pattern[3] != '1' || pattern[4] != '1')
+		{
+			printf("Riecoin address starts with ric1q\n");
+			exit(1);
+		}
+	}
+
+
+	// Check if pattern is valid
+	for(int i = strlen(hrp)+2; i < strlen(pattern); i++)
+	{
+		// if(pattern[i] == '1' || pattern[i] == 'b' || pattern[i] == 'i' || pattern[i] == 'o')
+		// {
+		// 	print_patterns();
+		// 	exit(1);
+		// }
+		if(pattern[i] != 'a' && pattern[i] != 'c' && pattern[i] != 'd'&& pattern[i] != 'e'&& pattern[i] != 'f'&& pattern[i] != 'g'&& pattern[i] != 'h' && pattern[i] != 'j'&& pattern[i] != 'k'&& pattern[i] != 'l'&& pattern[i] != 'm'&& pattern[i] != 'n' && pattern[i] != 'p'&& pattern[i] != 'q'&& pattern[i] != 'r'&& pattern[i] != 's'&& pattern[i] != 't'&& pattern[i] != 'u'&& pattern[i] != 'v'&& pattern[i] != 'y'&& pattern[i] != 'z'&& pattern[i] != '2'&& pattern[i] != '3'&& pattern[i] != '4'&& pattern[i] != '5'&& pattern[i] != '6'&& pattern[i] != '7'&& pattern[i] != '8'&& pattern[i] != '9'&& pattern[i] != '0')
+		{
+			print_patterns();
+			exit(1);
+		}
+	}
+}
 
 // Here is where the magic happens
 int main(int argc, char** argv)
 {
+
 	// Declare Secp256k1 Stuff
 	secp256k1_context *sec_ctx;
-	unsigned char sha_block[64], rmd_block[64], ScriptPubKey[20], ScriptPubKey_Append[22];
-	u64 privkey[4];
+	unsigned char sha_block[64], rmd_block[64], ScriptPubKey[20];
+	u64 privkey[4]; // private key binary
 	int i, k, fd, len; //for udev random
+	secp256k1_pubkey public_key; // public key object
+	unsigned char compressed_pubkey[33]; // compressed public key binary
+	char output[93]; //bech32 encoding output
+	const uint8_t *witprog;
+	witprog = ScriptPubKey;
+	size_t witprog_len = 20;
 
 
 	/* Initialize the secp256k1 context */
@@ -99,23 +217,34 @@ int main(int argc, char** argv)
 	// Generate a random private key. Specifically, any 256-bit number from 0x1
 	// to 0xFFFF FFFF FFFF FFFF FFFF FFFF FFFF FFFE BAAE DCE6 AF48 A03B BFD2 5E8C
 	// D036 4140 is a valid private key.
+	
+	parse_arguments(argc,argv);
+	printf("Pattern: %s\n",pattern);
 
-
-	// Pattern Matching
-	char *pattern = "bc1qtest";
-
-	for(int i = 3; i < strlen(pattern); i++)
+	if(coin == 0)
 	{
-		if(pattern[i] == '1' || pattern[i] == 'b' || pattern[i] == 'i' || pattern[i] == 'o')
-		{
-			printf("Invalid Pattern!\n");
-			exit(1);
-		}
+		hrp = "bc";
+		printf("Generating BTC Address\n");
 	}
+		
+	else if(coin == 1)
+	{
+		hrp = "ric";
+		printf("Generating RIC Address\n");
+	}
+	else
+	{
+		printf("No such coin \n");
+		exit(1);
+	}
+	
+	
+	//get_difficulty(pattern,hrp);
 
 
 	again:
 
+	// Generate private key
 	if((fd=open("/dev/urandom", O_RDONLY|O_NOCTTY)) == -1) {
 	perror("/dev/urandom");
 	return;
@@ -135,27 +264,19 @@ int main(int argc, char** argv)
 
 
 
-	// Generate public key from private key
-	secp256k1_pubkey public_key;
-	
+	// Generate Public Key from Private Key
 	secp256k1_ec_pubkey_create(sec_ctx,&public_key,&privkey);
-
-
-	unsigned char compressed_pubkey[33];
 	
+
+	// Generate Compressed Public Key
 	size_t  var = 33;   		/* actual variable declaration */
 	size_t  *outputlen;        /* pointer variable declaration */
 	outputlen = &var;  		/* store address of var in pointer variable*/
 
 	int result = secp256k1_ec_pubkey_serialize(sec_ctx,compressed_pubkey,outputlen,&public_key,SECP256K1_EC_COMPRESSED);
-	
-
 	//int valid_private_key = secp256k1_ec_seckey_verify(sec_ctx,&privkey);
 
-
-
-
-	
+	/*
 	// Obvious public key
 	// compressed_pubkey[32] = 0x00;
 	// compressed_pubkey[31] = 0x00;
@@ -274,18 +395,11 @@ int main(int argc, char** argv)
 	// 	compressed_pubkey[i] = temp;
 	// 	// printf("%02X vs %02X\n\n",compressed_pubkey[i],compressed_pubkey[j]);
 	// 	j--;
-	// }
+	// }	
 
-	if(debug)
-	{
-		printf("\n\n");
-		for(int i = 0; i < 32; i++)
-			printf("%02x",rmd_block[i]);
-		printf("\n");
-	}
-	
+	*/
 
-	/* Double Hash Compressed public key */
+	// Double Hash Compressed public key
 	int openssl = 1;
 	if(openssl)
 	{
@@ -295,7 +409,7 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		/* Double Hash Compressed public key */
+		// Using included sha256 and ripemd160 implementations
 		for(int i = 0; i < 33; i++)
 		{
 			sha_block[i] = compressed_pubkey[i];
@@ -314,21 +428,14 @@ int main(int argc, char** argv)
 	
 
 
-	char output[93];
-	const char *hrp = "bc";
 
-	const uint8_t *witprog; //ripemd(sha256(pub))
-	witprog = ScriptPubKey;
-
-	size_t witprog_len = 20;
+	int convert_bech32 = segwit_addr_encode(output,hrp,0,witprog, witprog_len);
 
 
-	int convert_bench32 = segwit_addr_encode(output,hrp,0,witprog, witprog_len);
-
-
-	if(convert_bench32 == 0)
+	if(convert_bech32 == 0)
 	{
-		printf("Bench32 convertion failed\n");
+		printf("Bech32 convertion failed\n");
+		exit(1);
 	}
 
 
@@ -347,34 +454,33 @@ int main(int argc, char** argv)
 
 	if(debug)
 	{
+		//Print Binary Contents of pubComp
 		printf("pubComp : ");
-	//Print Binary Contents of public
-	for(int i = 33-1; i >= 0; i--)
-	{
-		printf("%02x",compressed_pubkey[i]);
-	}
-	printf("\n");
+		
+		for(int i = 33-1; i >= 0; i--)
+		{
+			printf("%02x",compressed_pubkey[i]);
+		}
+		printf("\n");
 
+		// More debug prints
+		printf("rmd_block: ");
+		for(int i = 0; i < 20; i++)
+		{
+			printf("%02x",rmd_block[i]);
+		}
+		printf("\n");
 
-	printf("rmd_block: ");
-	for(int i = 0; i < 20; i++)
-	{
-		printf("%02x",rmd_block[i]);
-	}
-	printf("\n");
-
-	printf("ScriptPubKey        =   ");
-	for(int i = 0; i < 20; i++)
-	{
-		printf("%02x",ScriptPubKey[i]);
-		ScriptPubKey_Append[i] = ScriptPubKey[i];
-	}
-
-	printf("\n");
+		printf("ScriptPubKey        =   ");
+		for(int i = 0; i < 20; i++)
+		{
+			printf("%02x",ScriptPubKey[i]);
+		}
+		printf("\n");
 	}
 
-
-	printf("Address: %s\n",output);
+	// Print Segwit Address
+	printf("Address:       %s\n",output);
 
 	if(debug)
 	{
@@ -383,7 +489,6 @@ int main(int argc, char** argv)
 		printf("(Uncompressed) Public  Key Size = %d bytes, %d bits \n",sizeof(public_key.data),sizeof(public_key.data)*8);
 		printf("(Compressed)   Public  Key Size = %d bytes, %d bits \n",sizeof(compressed_pubkey),sizeof(compressed_pubkey)*8);
 		printf("          ScriptPubKey Key Size = %d bytes, %d bits \n",sizeof(ScriptPubKey),sizeof(ScriptPubKey)*8);
-		printf("   ScriptPubKey Key Append Size = %d bytes, %d bits \n",sizeof(ScriptPubKey_Append),sizeof(ScriptPubKey_Append)*8);
 		printf("\n\n");
 	}
 

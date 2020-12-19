@@ -3,11 +3,23 @@
 ```
 sudo apt install build-essential libgmp-dev libssl-dev
 make
-time ./vanitygen
-Private Key:   L42DfXUbG4nkcaxt5qkGQxJ91MafNyEGisZfjkcKCQQQxGeG7twi
-Address: bc1qtestraqjhj47v89atlqc0xklaekee9h0ckl0wc
-
-real	0m53,957s
-user	0m49,186s
-sys	0m4,643s
 ```
+
+## Bicoin Address
+```
+$ ./vanitygen -c BTC -p bcq1test
+Pattern: bc1qtest
+Generating BTC Address
+Private Key:   L3G9Cxtfz5rJ9WK65JWxrqYChyADz6SeQaG3CHUUTfUot7drKQ81
+Address:       bc1qtestzl055kqr6nfrn8yxwf8ec83jzd0yqpfckf
+```
+
+## Riecoin Address
+```
+$ ./vanitygen -c RIC -p ricq1test
+Pattern: ric1qtest
+Generating RIC Address
+Private Key:   L4c2MqpuBjL4MX9CDrKSBtRCCn6KxBGVTM9vA8sWTbzKGzpFTxR7
+Address:       ric1qtestzvrv7mq9scsfjfkwvdp25krldtspnypdz6
+```
+
