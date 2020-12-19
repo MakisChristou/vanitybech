@@ -19,7 +19,6 @@
 
 // Yes these are global variables!
 int debug = 0;
-int coin = 0;
 int threads = -1;
 int output = 0;
 char *pattern = "bc1qtest"; // Pattern to match 
@@ -72,7 +71,7 @@ void announce_result(int found, const u8 result[52])
 // Run this on retarded user input
 void print_usage()
 {
-
+	printf("vanitygen -p <PATTERN> -t <THREADS> -o <FILE>\n");
 }
 
 // Difficulty = 1/{valid pattern space}
@@ -88,41 +87,18 @@ double get_difficulty(char* pattern, char* hrp)
 
 }
 
-// Help user out
-void print_help()
-{
-	printf("./vanitygen -c <COIN> -t <THREADS> -p <PATTERN> \n");
-	printf("Example Generating Bitcoin Address\n");
-	printf("./vanitygen -C BTC -p bc1qtest\n");
-}
 
 // Use getopt to parse cli arguments
 void parse_arguments(int argc, char** argv)
 {
 	int opt;
-	while((opt = getopt(argc,argv, "c:p:t:")) != -1)
+	while((opt = getopt(argc,argv, "hp:t:")) != -1)
 	{
 		//Print Help Message
 		if(opt == 'h')
 		{
-			print_help();
-		}
-		// Select Coin
-		else if(opt == 'c')
-		{
-			if(!strcmp(optarg,"BTC"))
-			{
-				coin = 0;
-			}
-			else if(!strcmp(optarg,"RIC"))
-			{
-				coin = 1;
-			}
-			else
-			{
-				printf("Invalid coin selection\n");
-				exit(-1);
-			}
+			print_usage();
+			exit(1);
 		}
 		// Output results in a file
 		else if(opt == 'o')
@@ -143,34 +119,18 @@ void parse_arguments(int argc, char** argv)
 	}
 }
 
-// Run this on retarted user pattern
-void print_patterns()
-{
-	printf("Invalid Pattern!\n");
-	printf("Valid characters are: acdefghjklmlnpqrstuvwsyz023456789\n");
-}
 
 // Make sure user provided pattern is correct
 void check_pattern(char* pattern)
 {
 
-	if(coin == 0)
+	
+	if(pattern[0] != 'b' || pattern[1] != 'c' ||pattern[2] != '1' ||pattern[3] != 'q')
 	{
-		if(pattern[0] != 'b' || pattern[1] != 'c' ||pattern[2] != '1' ||pattern[3] != 'q')
-		{
-			printf("Bitcoin address starts with bc1q\n");
-			exit(1);
-		}
+		printf("Bitcoin address starts with bc1q\n");
+		exit(1);
 	}
-	else if(coin == 1)
-	{
-		if(pattern[0] != 'r' || pattern[1] != 'i' || pattern[2] != 'c' || pattern[3] != '1' || pattern[4] != '1')
-		{
-			printf("Riecoin address starts with ric1q\n");
-			exit(1);
-		}
-	}
-
+	
 
 	// Check if pattern is valid
 	for(int i = strlen(hrp)+2; i < strlen(pattern); i++)
@@ -182,7 +142,8 @@ void check_pattern(char* pattern)
 		// }
 		if(pattern[i] != 'a' && pattern[i] != 'c' && pattern[i] != 'd'&& pattern[i] != 'e'&& pattern[i] != 'f'&& pattern[i] != 'g'&& pattern[i] != 'h' && pattern[i] != 'j'&& pattern[i] != 'k'&& pattern[i] != 'l'&& pattern[i] != 'm'&& pattern[i] != 'n' && pattern[i] != 'p'&& pattern[i] != 'q'&& pattern[i] != 'r'&& pattern[i] != 's'&& pattern[i] != 't'&& pattern[i] != 'u'&& pattern[i] != 'v'&& pattern[i] != 'y'&& pattern[i] != 'z'&& pattern[i] != '2'&& pattern[i] != '3'&& pattern[i] != '4'&& pattern[i] != '5'&& pattern[i] != '6'&& pattern[i] != '7'&& pattern[i] != '8'&& pattern[i] != '9'&& pattern[i] != '0')
 		{
-			print_patterns();
+			printf("Invalid Pattern!\n");
+			printf("Valid characters are: acdefghjklmlnpqrstuvwsyz023456789\n");
 			exit(1);
 		}
 	}
@@ -217,26 +178,11 @@ int main(int argc, char** argv)
 	// Generate a random private key. Specifically, any 256-bit number from 0x1
 	// to 0xFFFF FFFF FFFF FFFF FFFF FFFF FFFF FFFE BAAE DCE6 AF48 A03B BFD2 5E8C
 	// D036 4140 is a valid private key.
-	
+
 	parse_arguments(argc,argv);
 	printf("Pattern: %s\n",pattern);
+	printf("Generating BTC Address\n");
 
-	if(coin == 0)
-	{
-		hrp = "bc";
-		printf("Generating BTC Address\n");
-	}
-		
-	else if(coin == 1)
-	{
-		hrp = "ric";
-		printf("Generating RIC Address\n");
-	}
-	else
-	{
-		printf("No such coin \n");
-		exit(1);
-	}
 	
 	
 	//get_difficulty(pattern,hrp);
