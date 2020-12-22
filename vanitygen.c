@@ -110,7 +110,7 @@ void parse_arguments(int argc, char** argv)
 		// Choose number of threads
 		else if(opt == 't')
 		{
-			threads = optarg;
+			//threads = optarg;
 		}
 		// Choose pattern
 		else if(opt == 'p')
@@ -156,8 +156,9 @@ void check_pattern(char* pattern)
 
 
 // Address generation code
-void vanity_engine()
+void* vanity_engine(void *vargp)
 {
+	int threadid = (int *)vargp;
 
 	// Declare Secp256k1 Stuff
 	secp256k1_context *sec_ctx;
@@ -181,23 +182,15 @@ void vanity_engine()
 	/* Initialize the secp256k1 context */
 	sec_ctx=secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
 
-	/* Set up sha256 block for an input length of 33 bytes */
-	sha256_prepare(sha_block, 33);
-
-	/* Set up rmd160 block for an input length of 32 bytes */
-	rmd160_prepare(rmd_block, 32);
-
 	// Generate a random private key. Specifically, any 256-bit number from 0x1
 	// to 0xFFFF FFFF FFFF FFFF FFFF FFFF FFFF FFFE BAAE DCE6 AF48 A03B BFD2 5E8C
 	// D036 4140 is a valid private key.
 
-
+	// To calculate total time
 	start_elapsed = clock();
-
 
 	again:
 
-	
     start = clock();
 	
 	// Generate private key
@@ -206,6 +199,7 @@ void vanity_engine()
 	return;
 	}
 
+	// Stolen from supervanitygen
 	/* Use 32 bytes from /dev/urandom as starting private key */
 	do {
 	if((len=read(fd, privkey, 32)) != 32) {
@@ -218,11 +212,8 @@ void vanity_engine()
 
 	close(fd);
 
-
-
 	// Generate Public Key from Private Key
 	secp256k1_ec_pubkey_create(sec_ctx,&public_key,&privkey);
-	
 
 	// Generate Compressed Public Key
 	size_t  var = 33;   		/* actual variable declaration */
@@ -355,36 +346,15 @@ void vanity_engine()
 
 	*/
 
-	// Double Hash Compressed public key
-	int openssl = 1;
-	if(openssl)
-	{
-		// Using Openssl for double checking 
-		SHA256(compressed_pubkey, 33, rmd_block);
-		RIPEMD160(rmd_block, 32, ScriptPubKey);
-	}
-	else
-	{
-		// Using included sha256 and ripemd160 implementations
-		for(int i = 0; i < 33; i++)
-		{
-			sha_block[i] = compressed_pubkey[i];
-		}
-		sha256_hash(rmd_block, compressed_pubkey);
-		rmd160_hash(ScriptPubKey, rmd_block);
-	}
-	
-	if(debug)
-	{
-		for(int i = 0; i < 32; i++)
-			printf("%02x",rmd_block[i]);
-		printf("\n");
-	}
 
-	
+	// Double Hash Compressed public key
+	SHA256(compressed_pubkey, 33, rmd_block);
+	RIPEMD160(rmd_block, 32, ScriptPubKey);
+
 
 	int convert_bech32 = segwit_addr_encode(output,hrp,0,witprog, witprog_len);
 
+	// If convertion fails exit gracefully
 	if(convert_bech32 == 0)
 	{
 		printf("Bech32 convertion failed\n");
@@ -392,67 +362,65 @@ void vanity_engine()
 	}
 
 
-	// Calculate
-	end = clock();
-	end_elapsed = clock();
-	total_time = ((double) (end_elapsed - start_elapsed)) / CLOCKS_PER_SEC;
-    iteration_time = ((double) (end - start)) / CLOCKS_PER_SEC;
-	iteration++;
-	iterations_per_second = 1.0/iteration_time;
-	int pattern_length = strlen(pattern)-4;
-	double num_of_patterns = pow(33,pattern_length);
-	double eta = iteration_time*num_of_patterns;
-	int total_time_rounded = (int)total_time;
-	int days = (int)total_time_rounded/60/60/24;
-	int hours =  ((total_time_rounded)/60/60) % 24;
-	int minutes = ((total_time_rounded)/60) % (60);
-	int seconds = (total_time_rounded) % 60;
-	
-	//printf("days= %d, hours = %d min = %d sec = %d \n",days,hours,minutes,seconds);
-	//printf("%d, %lf, %d mod %d = %d\n",total_time_rounded,total_time,(total_time_rounded),update_time,total_time_rounded % update_time);
+
+	// total_time ===> iteratio
+	// 1 -----> x
 
 
-	// Update Screen Every X seconds
-	if((flag == 1) && ((total_time_rounded % update_time) == 0))
+	if(threadid == 0)
 	{
-		flag = 0;
-		// Seconds
-		if(eta < 2*60)
-		{
-			printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf sec]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta);
-		}
-		// Minutes
-		else if(eta < 2*60*60)
-		{
-			printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf min]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60);
-		}
-		// Hours
-		else if(eta < 2*60*60*24)
-		{
-			printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf hours]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60);
-		}
-		// Days
-		else if(eta < 2*60*60*24*365*2)
-		{
-			printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf days]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60/24);
-		}
-		else
-		{
-			printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf years]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60/24/365);
-		}
-	}
-	else if(((total_time_rounded % update_time) != 0) && (flag == 0))
-	{
-		flag = 1;
-	}
+		end = clock();
+		end_elapsed = end;
+		total_time = ((double) (end_elapsed - start_elapsed)) / CLOCKS_PER_SEC; total_time = total_time / threads;
+		iteration_time = ((double) (end - start)) / CLOCKS_PER_SEC; iteration_time = iteration_time / threads;
+		iteration = iteration + threads;
+		//iterations_per_second = 1.0*iteration/total_time;
+		iterations_per_second = threads*1.0/iteration_time;
 
+		int pattern_length = strlen(pattern)-4;
+		double num_of_patterns = pow(33,pattern_length);
+		double eta = iteration_time*num_of_patterns/threads;
+		
+		int total_time_rounded = (int)total_time;
+		int days = (int)total_time_rounded/60/60/24;
+		int hours =  ((total_time_rounded)/60/60) % 24;
+		int minutes = ((total_time_rounded)/60) % (60);
+		int seconds = (total_time_rounded) % 60;
 
-
-	// if((iteration % (update_time*(int)iterations_per_second)) == 0)
-	// {
-	// 	printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Elapsed %0.0lf sec][ETA %0.0lf sec]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,total_time,eta);
-	// }
-
+		if((flag == 1) && ((total_time_rounded % update_time) == 0))
+		{
+			flag = 0;
+			// Seconds
+			if(eta < 2*60)
+			{
+				printf("%d [%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf sec]\n",threadid,days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta);
+			}
+			// Minutes
+			else if(eta < 2*60*60)
+			{
+				printf("%d [%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf min]\n",threadid,days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60);
+			}
+			// Hours
+			else if(eta < 2*60*60*24)
+			{
+				printf("%d [%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf hours]\n",threadid,days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60);
+			}
+			// Days
+			else if(eta < 2*60*60*24*365*2)
+			{
+				printf("%d [%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf days]\n",threadid,days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60/24);
+			}
+			else
+			{
+				printf("%d [%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf years]\n",threadid,days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60/24/365);
+			}
+		}
+		else if(((total_time_rounded % update_time) != 0) && (flag == 0))
+		{
+			flag = 1;
+		}
+	}	
+		
 
 	// Check if pattern matches
 	for(int i = 0; i < strlen(pattern); i++)
@@ -463,10 +431,7 @@ void vanity_engine()
 		}
 	}
 
-	
-	
 	printf("\n");
-	
 
 	// Print WIF private key
 	announce_result(1,privkey);
@@ -511,24 +476,47 @@ void vanity_engine()
 		printf("\n\n");
 	}
 
+	exit(1);
+
 }
+
+
+// Thread that prints stats hehe
+void* print_stats(void *vargp)
+{
+
+}
+
 
 // Here is where the magic happens
 int main(int argc, char** argv)
 {
-
-
 	parse_arguments(argc,argv);
 
-	pthread_t thread_id;
+	// // By default use all available threads
+	if(threads == -1)
+		threads = get_num_cpus();
 
-
+	
+	printf("Starting %d threads\n",threads);
 	printf("Pattern: %s\n",pattern);
-	printf("Generating BTC Address\n");
+
+ 	int noOfThread = threads;
+    pthread_t thread_id[noOfThread];
+    int i;
+    int status;
+
+    for(i=0;i<noOfThread;i++)
+    {	
+        pthread_create (&thread_id[i], NULL , &vanity_engine, i);
+    }  
+
+    for(i=0;i<noOfThread;i++)
+        pthread_join(thread_id[i],NULL);  
 
 
-	// Address generation loop
-	vanity_engine();
+
+	
 
 
 	return 0;
