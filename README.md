@@ -10,7 +10,7 @@ Since Bitcoin addresses are not reversable the only way to do this is to generat
 ## Estimated Time
 Guessing a private key with the chosen prefix has an element of luck to it. The following table depicts a rough estimate on what should  be expected on a Ryzen 3600 desktop processor using all of it's 12 threads. Your results may vary.
 
-| Prefix      | Eta(Ryzen 3600)|
+| Prefix      | Eta (Ryzen 3600)|
 | ------------- | ---------- |
 |bc1q0        	  | 20 ms           |
 |bc1q00           | 20 ms           |
@@ -51,4 +51,4 @@ Address:       bc1q0000erwyfzl9m6y9yr8sun52p6tvmrzp5jpwtt
 ```
 
 ## Important Notes
-When using this software double check the generated addresses using other implementations to make sure that everyting is working correctly. Do NOT send mainet coins unless you make sure that the generated address matches the coresponding private key. I would recommend this open source [tool](https://segwitaddress.org/bech32/). Also, please do not use the addresses shown in this readme file as you will (probably) get robbed.
+When using this software double check the generated addresses using other implementations to make sure that everyting is working correctly. Do NOT send mainnet coins to generated addresses unless you make sure that the address matches the coresponding private key. I would recommend this open source [tool](https://segwitaddress.org/bech32/) for double checking. Also, please do not use the addresses shown in this readme file as you will (probably) get robbed.
