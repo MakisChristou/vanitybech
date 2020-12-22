@@ -93,6 +93,13 @@ double get_difficulty(char* pattern, char* hrp)
 // Use getopt to parse cli arguments
 void parse_arguments(int argc, char** argv)
 {
+
+	if(argc < 2)
+	{
+		print_usage();
+		exit(1);
+	}
+
 	int opt;
 	while((opt = getopt(argc,argv, "hp:t:")) != -1)
 	{
@@ -110,7 +117,7 @@ void parse_arguments(int argc, char** argv)
 		// Choose number of threads
 		else if(opt == 't')
 		{
-			//threads = optarg;
+			threads = atoi(optarg);
 		}
 		// Choose pattern
 		else if(opt == 'p')
@@ -221,7 +228,7 @@ void* vanity_engine(void *vargp)
 	outputlen = &var;  		/* store address of var in pointer variable*/
 
 	int result = secp256k1_ec_pubkey_serialize(sec_ctx,compressed_pubkey,outputlen,&public_key,SECP256K1_EC_COMPRESSED);
-	//int valid_private_key = secp256k1_ec_seckey_verify(sec_ctx,&privkey);
+	
 
 	/*
 	// Obvious public key
@@ -362,11 +369,7 @@ void* vanity_engine(void *vargp)
 	}
 
 
-
-	// total_time ===> iteratio
-	// 1 -----> x
-
-
+	// Chad Thread 0 updates the screen
 	if(threadid == 0)
 	{
 		end = clock();
@@ -433,55 +436,26 @@ void* vanity_engine(void *vargp)
 
 	printf("\n");
 
-	// Print WIF private key
-	announce_result(1,privkey);
+	// Check if valid private key
+	int valid_private_key = secp256k1_ec_seckey_verify(sec_ctx,&privkey);
 
-	if(debug)
+	if(valid_private_key)
 	{
-		//Print Binary Contents of pubComp
-		printf("pubComp : ");
-		
-		for(int i = 33-1; i >= 0; i--)
-		{
-			printf("%02x",compressed_pubkey[i]);
-		}
-		printf("\n");
+		// Print WIF private key
+		announce_result(1,privkey);
 
-		// More debug prints
-		printf("rmd_block: ");
-		for(int i = 0; i < 20; i++)
-		{
-			printf("%02x",rmd_block[i]);
-		}
-		printf("\n");
-
-		printf("ScriptPubKey        =   ");
-		for(int i = 0; i < 20; i++)
-		{
-			printf("%02x",ScriptPubKey[i]);
-		}
-		printf("\n");
+		// Print Segwit Address
+		printf("Address:       %s\n",output);
 	}
-
-	// Print Segwit Address
-	printf("Address:       %s\n",output);
-
-	if(debug)
+	else
 	{
-		printf("\n\n");
-		printf("               Private Key Size = %d bytes, %d bits \n",sizeof(privkey),sizeof(privkey)*8);
-		printf("(Uncompressed) Public  Key Size = %d bytes, %d bits \n",sizeof(public_key.data),sizeof(public_key.data)*8);
-		printf("(Compressed)   Public  Key Size = %d bytes, %d bits \n",sizeof(compressed_pubkey),sizeof(compressed_pubkey)*8);
-		printf("          ScriptPubKey Key Size = %d bytes, %d bits \n",sizeof(ScriptPubKey),sizeof(ScriptPubKey)*8);
-		printf("\n\n");
+		printf("Invalid private key!\n");
 	}
-
 	exit(1);
-
 }
 
 
-// Thread that prints stats hehe
+// Unused for now
 void* print_stats(void *vargp)
 {
 
@@ -497,7 +471,7 @@ int main(int argc, char** argv)
 	if(threads == -1)
 		threads = get_num_cpus();
 
-	
+
 	printf("Starting %d threads\n",threads);
 	printf("Pattern: %s\n",pattern);
 
