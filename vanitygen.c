@@ -393,26 +393,26 @@ void* vanity_engine(void *vargp)
 			// Seconds
 			if(eta < 2*60)
 			{
-				printf("%d [%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf sec]\n",threadid,days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta);
+				printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf sec]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta);
 			}
 			// Minutes
 			else if(eta < 2*60*60)
 			{
-				printf("%d [%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf min]\n",threadid,days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60);
+				printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf min]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60);
 			}
 			// Hours
 			else if(eta < 2*60*60*24)
 			{
-				printf("%d [%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf hours]\n",threadid,days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60);
+				printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf hours]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60);
 			}
 			// Days
 			else if(eta < 2*60*60*24*365*2)
 			{
-				printf("%d [%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf days]\n",threadid,days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60/24);
+				printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf days]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60/24);
 			}
 			else
 			{
-				printf("%d [%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf years]\n",threadid,days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60/24/365);
+				printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf years]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60/24/365);
 			}
 		}
 		else if(((total_time_rounded % update_time) != 0) && (flag == 0))
