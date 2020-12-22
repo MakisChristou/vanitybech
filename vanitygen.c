@@ -25,6 +25,7 @@ int output = 0;
 char *pattern = "bc1qtest"; // Pattern to match 
 char *hrp = "bc"; // Different for each coin
 char *output_file;
+int update_time = 5; // Update screen every x seconds
 
 // Stolen from supervanitygen
 void announce_result(int found, const u8 result[52])
@@ -170,9 +171,12 @@ void vanity_engine()
 	witprog = ScriptPubKey;
 	size_t witprog_len = 20;
 	clock_t start, end;
-    double cpu_time_used;
+	clock_t start_elapsed, end_elapsed;
+    double iteration_time;
+	double total_time;
 	unsigned long long int iteration = 0;
-	double iteration_per_second = 0;
+	double iterations_per_second = 0;
+	int flag = 1;
 
 	/* Initialize the secp256k1 context */
 	sec_ctx=secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
@@ -188,13 +192,14 @@ void vanity_engine()
 	// D036 4140 is a valid private key.
 
 
+	start_elapsed = clock();
+
 
 	again:
 
 	
     start = clock();
 	
-
 	// Generate private key
 	if((fd=open("/dev/urandom", O_RDONLY|O_NOCTTY)) == -1) {
 	perror("/dev/urandom");
@@ -389,34 +394,64 @@ void vanity_engine()
 
 	// Calculate
 	end = clock();
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+	end_elapsed = clock();
+	total_time = ((double) (end_elapsed - start_elapsed)) / CLOCKS_PER_SEC;
+    iteration_time = ((double) (end - start)) / CLOCKS_PER_SEC;
 	iteration++;
-	iteration_per_second = 1.0/cpu_time_used;
+	iterations_per_second = 1.0/iteration_time;
 	int pattern_length = strlen(pattern)-4;
 	double num_of_patterns = pow(33,pattern_length);
-	double eta = cpu_time_used*num_of_patterns;
+	double eta = iteration_time*num_of_patterns;
+	int total_time_rounded = (int)total_time;
+	int days = (int)total_time_rounded/60/60/24;
+	int hours =  ((total_time_rounded)/60/60) % 24;
+	int minutes = ((total_time_rounded)/60) % (60);
+	int seconds = (total_time_rounded) % 60;
 	
+	//printf("days= %d, hours = %d min = %d sec = %d \n",days,hours,minutes,seconds);
+	//printf("%d, %lf, %d mod %d = %d\n",total_time_rounded,total_time,(total_time_rounded),update_time,total_time_rounded % update_time);
 
-	if(iteration == 1 || ((iteration % 1000) == 0))
+
+	// Update Screen Every X seconds
+	if((flag == 1) && ((total_time_rounded % update_time) == 0))
 	{
+		flag = 0;
 		// Seconds
-		if(eta <= 180)
+		if(eta < 2*60)
 		{
-			printf("[%d Kkey/s][Total %d][ETA %0.2lf sec]               \r",(int)iteration_per_second/1000,iteration,eta);
+			printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf sec]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta);
 		}
-		else if(eta < 180)
+		// Minutes
+		else if(eta < 2*60*60)
 		{
-			printf("[%d Kkey/s][Total %d][ETA %0.2lf min]               \r",(int)iteration_per_second/1000,iteration,eta/60);
+			printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf min]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60);
 		}
-		else if(eta < 7200)
+		// Hours
+		else if(eta < 2*60*60*24)
 		{
-			printf("[%d Kkey/s][Total %d][ETA %0.2lf hours]             \r",(int)iteration_per_second/1000,iteration,eta/60/60);
+			printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf hours]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60);
+		}
+		// Days
+		else if(eta < 2*60*60*24*365*2)
+		{
+			printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf days]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60/24);
 		}
 		else
 		{
-			printf("[%d Kkey/s][Total %d][ETA %0.2lf days]              \r",(int)iteration_per_second/1000,iteration,eta/60/60/24);
+			printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Eta %0.0lf years]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,eta/60/60/24/365);
 		}
 	}
+	else if(((total_time_rounded % update_time) != 0) && (flag == 0))
+	{
+		flag = 1;
+	}
+
+
+
+	// if((iteration % (update_time*(int)iterations_per_second)) == 0)
+	// {
+	// 	printf("[%02d:%02d:%02d:%02d][%d Kkey/s][Total %d][Elapsed %0.0lf sec][ETA %0.0lf sec]\n",days,hours,minutes,seconds,(int)iterations_per_second/1000,iteration,total_time,eta);
+	// }
 
 
 	// Check if pattern matches
@@ -484,6 +519,8 @@ int main(int argc, char** argv)
 
 
 	parse_arguments(argc,argv);
+
+	pthread_t thread_id;
 
 
 	printf("Pattern: %s\n",pattern);
