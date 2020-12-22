@@ -5,7 +5,7 @@ sudo apt install build-essential libgmp-dev libssl-dev
 make
 ```
 
-## Bicoin Address
+## Bitcoin Address
 ```
 $ ./vanitygen -p bc1q0000
 Pattern: bc1q0000
