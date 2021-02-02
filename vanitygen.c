@@ -22,7 +22,7 @@
 int debug = 0;
 int threads = -1;
 int output = 0;
-char *pattern = "bc1qtest"; // Pattern to match 
+char *pattern = "bcq1test"; // Pattern to match 
 char *hrp = "bc"; // Different for each coin
 char *output_file;
 int update_time = 5; // Update screen every x seconds
@@ -186,12 +186,21 @@ void* vanity_engine(void *vargp)
 	double iterations_per_second = 0;
 	int flag = 1;
 
+	char actual_pattern[93];
+
 	/* Initialize the secp256k1 context */
 	sec_ctx=secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
 
 	// Generate a random private key. Specifically, any 256-bit number from 0x1
 	// to 0xFFFF FFFF FFFF FFFF FFFF FFFF FFFF FFFE BAAE DCE6 AF48 A03B BFD2 5E8C
 	// D036 4140 is a valid private key.
+
+	for(int i = 4; i < strlen(pattern); i++)
+	{
+		actual_pattern[i-4] = pattern[i];
+	}
+
+	//printf("%s\n",actual_pattern);
 
 	// To calculate total time
 	start_elapsed = clock();
@@ -425,10 +434,12 @@ void* vanity_engine(void *vargp)
 	}	
 		
 
+
+
 	// Check if pattern matches
-	for(int i = 0; i < strlen(pattern); i++)
+	for(int i = 0; i < strlen(actual_pattern); i++)
 	{
-		if(!(pattern[i] == output[i]))
+		if(!(actual_pattern[i] == output[i+4]))
 		{
 			goto again;
 		}
