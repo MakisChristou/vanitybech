@@ -27,7 +27,7 @@ Guessing a private key with the chosen prefix has an element of luck to it. The 
 
 ## Compilation (Ubuntu 20.10)
 ```
-sudo apt install build-essential libgmp-dev libssl-dev
+sudo apt install build-essential libgmp-dev libssl-dev autoconf libtool
 make
 ```
 
