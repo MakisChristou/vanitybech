@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g -Ofast -Wall -Wno-unused-function -Wno-pointer-sign \
+CFLAGS=-g -O3 -Wall -Wno-unused-function -Wno-pointer-sign \
        -I. -Isecp256k1 -Isecp256k1/include -funsafe-loop-optimizations
 LDFLAGS=$(CFLAGS)
 LDLIBS=-lm -lgmp -lssl -lcrypto -lpthread

@@ -26,9 +26,10 @@ char *pattern = "bcq1test"; // Pattern to match
 char *hrp = "bc"; // Different for each coin
 char *output_file;
 int update_time = 5; // Update screen every x seconds
+int hex_priv = 0; // 1 for hex private keys, else WIF
 
 // Stolen from supervanitygen
-void announce_result(int found, const u8 result[52])
+void announce_result(int found, const u8 result[52], int hex_priv)
 {
   align8 u8 priv_block[64], pub_block[64], cksum_block[64];
   align8 u8 wif[64], checksum[32];
@@ -50,9 +51,20 @@ void announce_result(int found, const u8 result[52])
   sha256_hash(checksum, cksum_block);
   memcpy(priv_block+34, checksum, 4);
 
-  b58enc(wif, priv_block, 38);
+  if(hex_priv == 1)
+  {	
+	  printf("Private Key:   ");
+	  for(int i = 0; i < 32; i++)
+	  	printf("%02x", result[i]);
+	  printf("\n");
+  }
+  else
+  {
+	  b58enc(wif, priv_block, 38);
+	  printf("Private Key:   %s\n", wif);
+  }
   
-  printf("Private Key:   %s\n", wif);
+  
 
 //   /* Convert Public Key to Compressed WIF */
 
@@ -69,6 +81,7 @@ void announce_result(int found, const u8 result[52])
  
 //   printf("Address:       %s\n", wif);
 }
+
 
 // Run this on retarded user input
 void print_usage()
@@ -101,7 +114,7 @@ void parse_arguments(int argc, char** argv)
 	}
 
 	int opt;
-	while((opt = getopt(argc,argv, "hp:t:")) != -1)
+	while((opt = getopt(argc,argv, "hp:t:d")) != -1)
 	{
 		//Print Help Message
 		if(opt == 'h')
@@ -124,6 +137,10 @@ void parse_arguments(int argc, char** argv)
 		{
 			check_pattern(optarg);
 			pattern = optarg;
+		}
+		else if(opt == 'd')
+		{
+			hex_priv = 1;
 		}
 		else
 		{
@@ -452,8 +469,8 @@ void* vanity_engine(void *vargp)
 
 	if(valid_private_key)
 	{
-		// Print WIF private key
-		announce_result(1,privkey);
+		// Print WIF or HEX private key
+		announce_result(1, privkey, hex_priv);
 
 		// Print Segwit Address
 		printf("Address:       %s\n",output);
