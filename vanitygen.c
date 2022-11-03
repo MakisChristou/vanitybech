@@ -11,14 +11,13 @@
 #include "externs.h"
 #include "segwit_addr.h"
 
-// Chad Thundercock
 #include <pthread.h>
 #include <time.h>
 #include <openssl/sha.h>
 #include <openssl/ripemd.h>
 
 
-// Yes these are global variables!
+// Global variables
 int debug = 0;
 int threads = -1;
 int output = 0;
@@ -83,7 +82,7 @@ void announce_result(int found, const u8 result[52], int hex_priv)
 }
 
 
-// Run this on retarded user input
+// Run this on invalid user input
 void print_usage()
 {
 	printf("vanitygen -p <PATTERN> -t <THREADS> -o <FILE>\n");
@@ -253,133 +252,8 @@ void* vanity_engine(void *vargp)
 	size_t  *outputlen;        /* pointer variable declaration */
 	outputlen = &var;  		/* store address of var in pointer variable*/
 
-	int result = secp256k1_ec_pubkey_serialize(sec_ctx,compressed_pubkey,outputlen,&public_key,SECP256K1_EC_COMPRESSED);
+	int result = secp256k1_ec_pubkey_serialize(sec_ctx, compressed_pubkey, outputlen, &public_key, SECP256K1_EC_COMPRESSED);
 	
-
-	/*
-	// Obvious public key
-	// compressed_pubkey[32] = 0x00;
-	// compressed_pubkey[31] = 0x00;
-	// compressed_pubkey[30] = 0x00;
-	// compressed_pubkey[29] = 0x00;
-	// compressed_pubkey[28] = 0x00;
-	// compressed_pubkey[27] = 0x00;
-	// compressed_pubkey[26] = 0x00;
-	// compressed_pubkey[25] = 0x00;
-	// compressed_pubkey[24] = 0x00;
-	// compressed_pubkey[23] = 0x00;
-	// compressed_pubkey[22] = 0x00;
-	// compressed_pubkey[21] = 0x00;
-	// compressed_pubkey[20] = 0x00;
-	// compressed_pubkey[19] = 0x00;
-	// compressed_pubkey[18] = 0x00;
-	// compressed_pubkey[17] = 0x00;
-	// compressed_pubkey[16] = 0x00;
-	// compressed_pubkey[15] = 0x00;
-	// compressed_pubkey[14] = 0x00;
-	// compressed_pubkey[13] = 0x00;
-	// compressed_pubkey[12] = 0x00;
-	// compressed_pubkey[11] = 0x00;
-	// compressed_pubkey[10] = 0x00;
-	// compressed_pubkey[9] = 0x00;
-	// compressed_pubkey[8] = 0x00;
-	// compressed_pubkey[7] = 0x00;
-	// compressed_pubkey[6] = 0x00;
-	// compressed_pubkey[5] = 0x00;
-	// compressed_pubkey[4] = 0x00;
-	// compressed_pubkey[3] = 0x00;
-	// compressed_pubkey[2] = 0x00;
-	// compressed_pubkey[1] = 0x00;
-	// compressed_pubkey[0] = 0x00;
-
-	//Pttn Example
-	// compressed_pubkey[32] = 0x03;
-	// compressed_pubkey[31] = 0xf6;
-	// compressed_pubkey[30] = 0xa8;
-	// compressed_pubkey[29] = 0xf0;
-	// compressed_pubkey[28] = 0xd8;
-	// compressed_pubkey[27] = 0x54;
-	// compressed_pubkey[26] = 0x2c;
-	// compressed_pubkey[25] = 0x31;
-	// compressed_pubkey[24] = 0xf2;
-	// compressed_pubkey[23] = 0x30;
-	// compressed_pubkey[22] = 0xa3;
-	// compressed_pubkey[21] = 0xf4;
-	// compressed_pubkey[20] = 0x51;
-	// compressed_pubkey[19] = 0xa2;
-	// compressed_pubkey[18] = 0x18;
-	// compressed_pubkey[17] = 0xfa;
-	// compressed_pubkey[16] = 0xcc;
-	// compressed_pubkey[15] = 0xa8;
-	// compressed_pubkey[14] = 0x54;
-	// compressed_pubkey[13] = 0x26;
-	// compressed_pubkey[12] = 0x51;
-	// compressed_pubkey[11] = 0xc9;
-	// compressed_pubkey[10] = 0xe6;
-	// compressed_pubkey[9] = 	0x5b;
-	// compressed_pubkey[8] = 	0xe7;
-	// compressed_pubkey[7] = 	0xe1;
-	// compressed_pubkey[6] = 	0x53;
-	// compressed_pubkey[5] = 	0xcf;
-	// compressed_pubkey[4] = 	0x26;
-	// compressed_pubkey[3] = 	0x97;
-	// compressed_pubkey[2] = 	0x48;
-	// compressed_pubkey[1] = 	0x07;
-	// compressed_pubkey[0] = 	0xce;
-
-	//
-	// Example from https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses
-	// compressed_pubkey[32] = 0x02;
-	// compressed_pubkey[31] = 0x50;
-	// compressed_pubkey[30] = 0x86;
-	// compressed_pubkey[29] = 0x3a;
-	// compressed_pubkey[28] = 0xd6;
-	// compressed_pubkey[27] = 0x4a;
-	// compressed_pubkey[26] = 0x87;
-	// compressed_pubkey[25] = 0xae;
-	// compressed_pubkey[24] = 0x8a;
-	// compressed_pubkey[23] = 0x2f;
-	// compressed_pubkey[22] = 0xe8;
-	// compressed_pubkey[21] = 0x3c;
-	// compressed_pubkey[20] = 0x1a;
-	// compressed_pubkey[19] = 0xf1;
-	// compressed_pubkey[18] = 0xa8;
-	// compressed_pubkey[17] = 0x40;
-	// compressed_pubkey[16] = 0x3c;
-	// compressed_pubkey[15] = 0xb5;
-	// compressed_pubkey[14] = 0x3f;
-	// compressed_pubkey[13] = 0x53;
-	// compressed_pubkey[12] = 0xe4;
-	// compressed_pubkey[11] = 0x86;
-	// compressed_pubkey[10] = 0xd8;
-	// compressed_pubkey[9] =  0x51;
-	// compressed_pubkey[8] =  0x1d;
-	// compressed_pubkey[7] =  0xad;
-	// compressed_pubkey[6] =  0x8a;
-	// compressed_pubkey[5] =  0x04;
-	// compressed_pubkey[4] =  0x88;
-	// compressed_pubkey[3] =  0x7e;
-	// compressed_pubkey[2] =  0x5b;
-	// compressed_pubkey[1] =  0x23;
-	// compressed_pubkey[0] =  0x52;
-
-	// Reverse Public Key (Only for hardcoded public keys)
-	// int j = 32;
-	// for(int i = 0; i < 17; i++)
-	// {
-	// 	// printf("%d vs %d\n",i,j);
-	// 	// printf("%02X vs %02X\n",compressed_pubkey[i],compressed_pubkey[j]);
-	// 	unsigned char temp;
-	// 	temp = compressed_pubkey[j];
-	// 	compressed_pubkey[j] = compressed_pubkey[i];
-	// 	compressed_pubkey[i] = temp;
-	// 	// printf("%02X vs %02X\n\n",compressed_pubkey[i],compressed_pubkey[j]);
-	// 	j--;
-	// }	
-
-	*/
-
-
 	// Double Hash Compressed public key
 	SHA256(compressed_pubkey, 33, rmd_block);
 	RIPEMD160(rmd_block, 32, ScriptPubKey);
@@ -395,7 +269,7 @@ void* vanity_engine(void *vargp)
 	}
 
 
-	// Chad Thread 0 updates the screen
+	// Thread 0 updates the screen
 	if(threadid == 0)
 	{
 		end = clock();
@@ -450,9 +324,6 @@ void* vanity_engine(void *vargp)
 		}
 	}	
 		
-
-
-
 	// Check if pattern matches
 	for(int i = 0; i < strlen(actual_pattern); i++)
 	{
@@ -474,28 +345,20 @@ void* vanity_engine(void *vargp)
 
 		// Print Segwit Address
 		printf("Address:       %s\n",output);
+		exit(0);
 	}
 	else
 	{
 		printf("Invalid private key!\n");
+		exit(1);
 	}
-	exit(1);
 }
 
-
-// Unused for now
-void* print_stats(void *vargp)
-{
-
-}
-
-
-// Here is where the magic happens
 int main(int argc, char** argv)
 {
 	parse_arguments(argc,argv);
 
-	// // By default use all available threads
+	// By default use all available threads
 	if(threads == -1)
 		threads = get_num_cpus();
 
@@ -509,17 +372,10 @@ int main(int argc, char** argv)
     int status;
 
     for(i=0;i<noOfThread;i++)
-    {	
-        pthread_create (&thread_id[i], NULL , &vanity_engine, i);
-    }  
-
+    	pthread_create (&thread_id[i], NULL , &vanity_engine, i);
+    
     for(i=0;i<noOfThread;i++)
         pthread_join(thread_id[i],NULL);  
-
-
-
-	
-
 
 	return 0;
 }
