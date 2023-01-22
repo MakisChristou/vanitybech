@@ -168,10 +168,10 @@ void check_pattern(char* pattern)
 		// 	print_patterns();
 		// 	exit(1);
 		// }
-		if(pattern[i] != 'a' && pattern[i] != 'c' && pattern[i] != 'd'&& pattern[i] != 'e'&& pattern[i] != 'f'&& pattern[i] != 'g'&& pattern[i] != 'h' && pattern[i] != 'j'&& pattern[i] != 'k'&& pattern[i] != 'l'&& pattern[i] != 'm'&& pattern[i] != 'n' && pattern[i] != 'p'&& pattern[i] != 'q'&& pattern[i] != 'r'&& pattern[i] != 's'&& pattern[i] != 't'&& pattern[i] != 'u'&& pattern[i] != 'v'&& pattern[i] != 'y'&& pattern[i] != 'z'&& pattern[i] != '2'&& pattern[i] != '3'&& pattern[i] != '4'&& pattern[i] != '5'&& pattern[i] != '6'&& pattern[i] != '7'&& pattern[i] != '8'&& pattern[i] != '9'&& pattern[i] != '0')
+		if(pattern[i] != 'a' && pattern[i] != 'c' && pattern[i] != 'd'&& pattern[i] != 'e'&& pattern[i] != 'f'&& pattern[i] != 'g'&& pattern[i] != 'h' && pattern[i] != 'j'&& pattern[i] != 'k'&& pattern[i] != 'l'&& pattern[i] != 'm'&& pattern[i] != 'n' && pattern[i] != 'p'&& pattern[i] != 'q'&& pattern[i] != 'r'&& pattern[i] != 's'&& pattern[i] != 't'&& pattern[i] != 'u'&& pattern[i] != 'v'&& pattern[i] != 'w'&& pattern[i] != 'x'&& pattern[i] != 'y'&& pattern[i] != 'z'&& pattern[i] != '2'&& pattern[i] != '3'&& pattern[i] != '4'&& pattern[i] != '5'&& pattern[i] != '6'&& pattern[i] != '7'&& pattern[i] != '8'&& pattern[i] != '9'&& pattern[i] != '0')
 		{
 			printf("Invalid Pattern!\n");
-			printf("Valid characters are: acdefghjklmlnpqrstuvwsyz023456789\n");
+			printf("Valid characters are: acdefghjklmnpqrstuvwxyz023456789\n");
 			exit(1);
 		}
 	}
